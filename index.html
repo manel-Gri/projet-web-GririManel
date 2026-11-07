@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quiz Arcade – Choisis ta catégorie</title>
+  <meta name="description" content="Quiz interactif style rétro arcade : joue en solo ou en groupe, choisis une catégorie et bats le high score.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;family=VT323&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-screen="home">
+  <div class="crt" aria-hidden="true"></div>
+
+  <header class="top">
+    <p class="logo">QUIZ<span>ARCADE</span></p>
+    <p class="hi">HI-SCORE <span id="hiscore">0000</span></p>
+    <div class="top-actions">
+      <button id="btn-board-top" class="icon-btn" type="button" data-go="board">🏆 TOP</button>
+      <button id="sound" class="icon-btn" type="button" aria-pressed="true" aria-label="Couper le son">♪ ON</button>
+    </div>
+  </header>
+
+  <main id="app">
+    <!-- ÉCRAN TITRE -->
+    <section id="screen-home" class="screen active" aria-labelledby="t-home">
+      <h1 id="t-home" class="title">QUIZ<br><span>ARCADE</span></h1>
+      <p class="blink">▶ INSERT COIN ◀</p>
+      <p class="sub">Choisis ta catégorie, réponds vite, enchaîne les combos !</p>
+
+      <div class="name-box">
+        <label class="field" for="player-name">TON PSEUDO (SOLO)</label>
+        <input id="player-name" class="input" type="text" maxlength="12" autocomplete="nickname" placeholder="JOUEUR">
+      </div>
+
+      <div class="row">
+        <button id="btn-play" class="btn btn-big" type="button">▶ SOLO</button>
+        <button id="btn-group" class="btn btn-big btn-pink" type="button">👥 GROUPE</button>
+      </div>
+      <button class="btn btn-ghost" type="button" data-go="board">🏆 CLASSEMENT</button>
+
+      <ul class="rules">
+        <li><span class="k">A B C D</span> répondre au clavier</li>
+        <li><span class="k">15 s</span> par question</li>
+        <li><span class="k">x2 x3</span> multiplicateur de combo</li>
+        <li><span class="k">♥♥♥</span> 3 vies seulement</li>
+        <li><span class="k">2-6</span> joueurs en mode groupe</li>
+        <li><span class="k">TOP</span> classement des meilleurs</li>
+      </ul>
+    </section>
+
+    <!-- JOUEURS (MODE GROUPE) -->
+    <section id="screen-players" class="screen" aria-labelledby="t-players">
+      <h2 id="t-players" class="h2">MODE GROUPE</h2>
+      <p class="sub wide">De 2 à 6 joueurs. Chacun joue à son tour sur le même appareil, avec les mêmes questions.</p>
+      <div id="players" class="players"></div>
+      <button id="btn-add-player" class="btn btn-ghost" type="button">+ JOUEUR</button>
+      <div class="row">
+        <button class="btn btn-ghost" type="button" data-go="home">◀ RETOUR</button>
+        <button id="btn-players-ok" class="btn" type="button">CATÉGORIE ▶</button>
+      </div>
+    </section>
+
+    <!-- CATÉGORIES -->
+    <section id="screen-cat" class="screen" aria-labelledby="t-cat">
+      <h2 id="t-cat" class="h2">SELECT STAGE</h2>
+      <p id="cat-hint" class="sub wide" hidden></p>
+      <div id="cats" class="cats"></div>
+      <button id="cat-back" class="btn btn-ghost" type="button">◀ RETOUR</button>
+    </section>
+
+    <!-- PASSAGE DE TOUR (GROUPE) -->
+    <section id="screen-turn" class="screen" aria-labelledby="t-turn">
+      <p class="blink">▶ JOUEUR <span id="turn-num">1/2</span> ◀</p>
+      <h2 id="t-turn" class="h2 turn-name">…</h2>
+      <p id="turn-info" class="sub wide"></p>
+      <button id="btn-go" class="btn btn-big" type="button">GO !</button>
+    </section>
+
+    <!-- JEU -->
+    <section id="screen-game" class="screen" aria-labelledby="question">
+      <div class="hud">
+        <p id="hud-player-wrap" hidden>JOUEUR <span id="hud-player">-</span></p>
+        <p>STAGE <span id="hud-cat">-</span></p>
+        <p>Q <span id="hud-q">1/8</span></p>
+        <p>SCORE <span id="hud-score">0000</span></p>
+        <p class="lives" aria-label="Vies restantes"><span id="hud-lives">♥♥♥</span></p>
+      </div>
+      <div class="timer" role="progressbar" aria-label="Temps restant" aria-valuemin="0" aria-valuemax="15" aria-valuenow="15">
+        <div id="timer-bar"></div>
+      </div>
+      <p id="combo" class="combo" aria-live="polite"></p>
+      <h2 id="question" class="question">…</h2>
+      <div id="answers" class="answers"></div>
+      <p id="feedback" class="feedback" role="status" aria-live="assertive"></p>
+      <button id="btn-next" class="btn" type="button" hidden>NEXT ▶</button>
+    </section>
+
+    <!-- FIN (SOLO) -->
+    <section id="screen-end" class="screen" aria-labelledby="t-end">
+      <h2 id="t-end" class="h2 end-title">GAME OVER</h2>
+      <p id="rank" class="rank">A</p>
+      <dl class="stats">
+        <div><dt>SCORE</dt><dd id="end-score">0</dd></div>
+        <div><dt>BONNES</dt><dd id="end-good">0/8</dd></div>
+        <div><dt>MAX COMBO</dt><dd id="end-combo">0</dd></div>
+      </dl>
+      <p id="end-msg" class="sub"></p>
+      <p id="new-record" class="record blink" hidden>★ NEW HI-SCORE ★</p>
+      <div class="row">
+        <button id="btn-retry" class="btn" type="button">REJOUER</button>
+        <button class="btn btn-ghost" type="button" data-go="cat">CATÉGORIES</button>
+        <button class="btn btn-ghost" type="button" data-go="board">🏆 CLASSEMENT</button>
+      </div>
+    </section>
+
+    <!-- FIN (GROUPE) -->
+    <section id="screen-group" class="screen" aria-labelledby="t-group">
+      <h2 id="t-group" class="h2 end-title">…</h2>
+      <ol id="group-rank" class="group-rank"></ol>
+      <div class="row">
+        <button id="btn-group-again" class="btn" type="button">REJOUER</button>
+        <button class="btn btn-ghost" type="button" data-go="board">🏆 CLASSEMENT</button>
+        <button class="btn btn-ghost" type="button" data-go="home">ACCUEIL</button>
+      </div>
+    </section>
+
+    <!-- CLASSEMENT -->
+    <section id="screen-board" class="screen" aria-labelledby="t-board">
+      <h2 id="t-board" class="h2">🏆 CLASSEMENT</h2>
+      <div id="tabs" class="tabs"></div>
+      <div class="table-wrap">
+        <table class="board">
+          <caption class="sr-only">Meilleurs scores</caption>
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">JOUEUR</th>
+              <th scope="col">STAGE</th>
+              <th scope="col" class="num">SCORE</th>
+              <th scope="col" class="col-date">DATE</th>
+            </tr>
+          </thead>
+          <tbody id="board-body"></tbody>
+        </table>
+      </div>
+      <p id="board-empty" class="sub wide" hidden>Aucun score pour l'instant. À toi de jouer !</p>
+      <div class="row">
+        <button class="btn btn-ghost" type="button" data-go="home">◀ ACCUEIL</button>
+        <button id="btn-clear" class="btn btn-danger" type="button">EFFACER</button>
+      </div>
+    </section>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
