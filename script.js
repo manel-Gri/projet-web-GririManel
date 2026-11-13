@@ -1,58 +1,37 @@
 "use strict";
 
-  culture: {
-    name: "CULTURE", icon: "🌍", color: "var(--cyan)",
-    q: [
-      ["Quel est le plus grand pays d'Afrique par sa superficie ?", ["Algérie", "RD Congo", "Soudan", "Libye"], 0],
-      ["Quel peintre a réalisé « La Nuit étoilée » ?", ["Claude Monet", "Vincent van Gogh", "Paul Cézanne", "Edvard Munch"], 1],
-      ["Quel est le plus grand océan du monde ?", ["Atlantique", "Indien", "Pacifique", "Arctique"], 2],
-      ["Quelle ville tunisienne abrite une grande mosquée fondée en 670 ?", ["Sousse", "Monastir", "Bizerte", "Kairouan"], 3],
-      ["Qui a écrit « Le Petit Prince » ?", ["Jules Verne", "Antoine de Saint-Exupéry", "Albert Camus", "Alexandre Dumas"], 1],
-      ["Quel pays est surnommé le « pays du Soleil-Levant » ?", ["Chine", "Corée du Sud", "Japon", "Thaïlande"], 2],
-      ["Quel est le plus petit pays du monde ?", ["Monaco", "Saint-Marin", "Vatican", "Liechtenstein"], 2],
-      ["Combien de touches compte un piano standard ?", ["76", "88", "92", "100"], 1]
-    ]
-  },
-  info: {
-    name: "WEB / INFO", icon: "💻", color: "var(--lime)",
-    q: [
-      ["Que signifie CSS ?", ["Cascading Style Sheets", "Computer Style System", "Creative Style Syntax", "Colored Style Sheets"], 0],
-      ["Quel langage permet de rendre une page web interactive dans le navigateur ?", ["Python", "C++", "SQL", "JavaScript"], 3],
-      ["Quelle balise HTML crée un lien hypertexte ?", ["<link>", "<img>", "<a>", "<href>"], 2],
-      ["Que signifie « www » dans une adresse web ?", ["World Wide Web", "Web Wide World", "World Web Wire", "Wide World Web"], 0],
-      ["Quel symbole débute un sélecteur d'identifiant en CSS ?", [".", "#", "@", "&"], 1],
-      ["Quelle méthode JS ajoute un élément à la fin d'un tableau ?", ["pop()", "shift()", "push()", "slice()"], 2],
-      ["Que signifie « HTTP » ?", ["High Transfer Text Protocol", "HyperText Transmission Process", "Host Transfer Text Protocol", "HyperText Transfer Protocol"], 3],
-      ["Quelle commande Git enregistre les changements dans l'historique ?", ["git push", "git clone", "git pull", "git commit"], 3]
-    ]
-  },
-  science: {
-    name: "SCIENCES", icon: "🧪", color: "var(--pink)",
-    q: [
-      ["Quelle planète est surnommée la planète rouge ?", ["Mars", "Jupiter", "Vénus", "Saturne"], 0],
-      ["Quel élément chimique a pour symbole O ?", ["Or", "Osmium", "Oxygène", "Oganesson"], 2],
-      ["Combien de planètes compte le système solaire ?", ["7", "8", "9", "10"], 1],
-      ["Quelle est la formule chimique de l'eau ?", ["CO₂", "H₂O", "O₂", "NaCl"], 1],
-      ["Quel est le plus grand organe du corps humain ?", ["Le foie", "Le cerveau", "La peau", "L'intestin"], 2],
-      ["Quel scientifique a découvert la pénicilline ?", ["Louis Pasteur", "Alexander Fleming", "Marie Curie", "Isaac Newton"], 1],
-      ["Quel est l'animal terrestre le plus rapide ?", ["Le guépard", "Le lion", "Le cheval", "L'antilope"], 0],
-      ["Comment s'appelle la galaxie qui contient notre système solaire ?", ["Andromède", "Triangulum", "Magellan", "La Voie lactée"], 3]
-    ]
-  },
-  sport: {
-    name: "SPORT", icon: "⚽", color: "var(--yellow)",
-    q: [
-      ["Combien de sets faut-il gagner pour remporter un match masculin de Grand Chelem ?", ["2", "3", "4", "5"], 1],
-      ["Quel pays a organisé la Coupe du monde de football 2018 ?", ["Brésil", "Allemagne", "Russie", "Qatar"], 2],
-      ["Dans quel sport utilise-t-on un volant ?", ["Squash", "Tennis", "Ping-pong", "Badminton"], 3],
-      ["Combien de joueurs par équipe sur le terrain au volley-ball ?", ["5", "7", "6", "8"], 2],
-      ["Quel athlète jamaïcain détient le record du monde du 100 m ?", ["Yohan Blake", "Asafa Powell", "Usain Bolt", "Justin Gatlin"], 2],
-      ["Dans quelle ville se trouve le stade Camp Nou ?", ["Madrid", "Séville", "Barcelone", "Valence"], 2],
-      ["En quelle année la Tunisie a-t-elle remporté la CAN de football ?", ["1998", "2012", "2019", "2004"], 3],
-      ["Quel sport se pratique lors du Tour de France ?", ["Cyclisme", "Course à pied", "Natation", "Aviron"], 0]
-    ]
-  }
-};
+/* =====================================================================
+   Quiz arcade — client JS
+   Le navigateur n'affiche que ce que le serveur PHP lui donne :
+   questions (sans la bonne réponse), correction, score, classement.
+   ===================================================================== */
+
+const API = "api/";
+
+// Apparence uniquement : les questions sont dans la base MySQL
+// Les catégories viennent de la table questions : la clé = le nom exact en base.
+let CATEGORIES = {};
+const CAT_COLORS = ["var(--cyan)", "var(--lime)", "var(--pink)", "var(--yellow)"];
+const CAT_ICONS = [
+  [/info|web|ordinateur/i, "💻"], [/program|code/i, "⌨️"], [/donn|sql|base/i, "🗄️"],
+  [/scien|physi|chim|bio/i, "🧪"], [/sport/i, "⚽"], [/cultur|g[ée]o|histoire/i, "🌍"],
+  [/musi/i, "🎵"], [/cin[ée]|film/i, "🎬"]
+];
+const CAT_FALLBACK_ICONS = ["🎯", "🧠", "📚", "🎮", "🏆", "⭐"];
+
+async function loadCategories() {
+  let names = [];
+  try { names = await api("categories.php"); } catch (e) { names = []; }
+  CATEGORIES = {};
+  names.forEach((n, k) => {
+    const hit = CAT_ICONS.find(([re]) => re.test(n));
+    CATEGORIES[n] = {
+      name: n.toUpperCase(),
+      icon: hit ? hit[1] : CAT_FALLBACK_ICONS[k % CAT_FALLBACK_ICONS.length],
+      color: CAT_COLORS[k % CAT_COLORS.length]
+    };
+  });
+}
 
 const TIME = 15;          // doit être identique à TIME_LIMIT dans bootstrap.php
 const MIN_PLAYERS = 2;
