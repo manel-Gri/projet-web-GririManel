@@ -92,7 +92,11 @@ main { flex: 1; display: grid; place-items: center; padding: 2rem 1rem; }
 .row .btn-big { padding: 1.2rem 1.8rem; font-size: 1rem; }
 .row .btn-big.btn-pink { animation: none; }
 
-.icon-btn { font-family: var(--pixel); font-size: .6rem; background: none; border: 2px solid var(--pink); color: var(--pink); padding: .5rem; cursor: pointer; }
+/* Cibles tactiles d'au moins 44 px (accessibilité mobile) */
+.icon-btn {
+  font-family: var(--pixel); font-size: .6rem; background: none; border: 2px solid var(--pink); color: var(--pink);
+  padding: .5rem; cursor: pointer; min-height: 44px; min-width: 44px;
+}
 .icon-btn:hover { background: var(--pink); color: var(--bg); }
 .icon-btn.danger { border-color: var(--red); color: var(--red); min-width: 2.6rem; }
 .icon-btn.danger:hover { background: var(--red); color: var(--bg); }
@@ -132,6 +136,11 @@ main { flex: 1; display: grid; place-items: center; padding: 2rem 1rem; }
 .hud span { color: var(--cyan); }
 .lives span { color: var(--red); font-size: .9rem; }
 
+/* Progression des questions (nouveau) */
+.qprogress { width: 100%; height: 10px; border: 2px solid var(--pink); padding: 2px; }
+#quiz-bar { height: 100%; width: 0; background: var(--pink); transition: width .4s steps(8); }
+
+/* Temps restant */
 .timer { width: 100%; height: 14px; border: 2px solid var(--cyan); padding: 2px; }
 #timer-bar { height: 100%; width: 100%; background: repeating-linear-gradient(90deg, var(--lime) 0 10px, transparent 10px 12px); transition: width 1s linear; }
 #timer-bar.low { background: repeating-linear-gradient(90deg, var(--red) 0 10px, transparent 10px 12px); }
@@ -139,6 +148,9 @@ main { flex: 1; display: grid; place-items: center; padding: 2rem 1rem; }
 .combo { font-family: var(--pixel); font-size: .8rem; color: var(--yellow); min-height: 1rem; }
 .combo.pop { animation: pop .4s; }
 @keyframes pop { 50% { transform: scale(1.5); } }
+
+/* Type de question : QCM ou VRAI / FAUX (nouveau) */
+.q-type { font-family: var(--pixel); font-size: .6rem; color: var(--pink); }
 
 .question { font-family: var(--mono); font-size: clamp(1.7rem, 4vw, 2.3rem); line-height: 1.2; min-height: 3em; display: grid; place-items: center; }
 
@@ -155,6 +167,10 @@ main { flex: 1; display: grid; place-items: center; padding: 2rem 1rem; }
 .ans.bad { opacity: 1; border-color: var(--red); background: var(--red); color: var(--bg); animation: shake .35s; }
 .ans.good .letter, .ans.bad .letter { color: var(--bg); }
 @keyframes shake { 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+
+/* Transition entre les questions (nouveau) */
+.q-enter { animation: qin .35s ease-out; }
+@keyframes qin { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
 
 .feedback { font-family: var(--pixel); font-size: .75rem; min-height: 1.2rem; }
 .feedback.good { color: var(--lime); }
@@ -188,7 +204,7 @@ main { flex: 1; display: grid; place-items: center; padding: 2rem 1rem; }
 .tabs { display: flex; flex-wrap: wrap; gap: .6rem; justify-content: center; }
 .tab {
   font-family: var(--pixel); font-size: .6rem; padding: .7rem .9rem; cursor: pointer;
-  background: none; border: 2px solid var(--dim); color: var(--dim);
+  background: none; border: 2px solid var(--dim); color: var(--dim); min-height: 44px;
 }
 .tab:hover { color: var(--text); border-color: var(--text); }
 .tab[aria-pressed="true"] { background: var(--yellow); border-color: var(--yellow); color: var(--bg); }
@@ -196,15 +212,15 @@ main { flex: 1; display: grid; place-items: center; padding: 2rem 1rem; }
 .table-wrap { width: 100%; overflow-x: auto; border: 3px solid var(--cyan); background: var(--panel); }
 .board { width: 100%; border-collapse: collapse; font-size: 1.3rem; }
 .board th {
-  font-family: var(--pixel); font-size: .55rem; color: var(--dim);
+  font-family: var(--pixel); font-size: .6rem; color: var(--dim);
   padding: .9rem .6rem; border-bottom: 3px solid var(--cyan); text-align: left;
 }
 .board td { padding: .55rem .6rem; border-bottom: 1px dashed rgba(139, 139, 153, .35); text-align: left; overflow-wrap: anywhere; }
 .board tr:last-child td { border-bottom: none; }
 .board .num { text-align: right; font-family: var(--pixel); font-size: .75rem; color: var(--lime); white-space: nowrap; }
-.board th.num { color: var(--dim); font-size: .55rem; }
+.board th.num { color: var(--dim); font-size: .6rem; }
 .board .rk { font-family: var(--pixel); font-size: .75rem; white-space: nowrap; width: 3rem; }
-.board .stage { font-family: var(--pixel); font-size: .55rem; white-space: nowrap; }
+.board .stage { font-family: var(--pixel); font-size: .6rem; white-space: nowrap; }
 .board .col-date { color: var(--dim); white-space: nowrap; }
 .board tr.me { background: rgba(250, 204, 21, .15); }
 .board tr.me td:first-child { box-shadow: inset 4px 0 0 var(--yellow); }
